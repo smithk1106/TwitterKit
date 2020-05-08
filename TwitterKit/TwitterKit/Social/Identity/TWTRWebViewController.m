@@ -18,9 +18,9 @@
 #import "TWTRWebViewController.h"
 #import <TwitterCore/TWTRAuthenticationConstants.h>
 
-@interface TWTRWebViewController () <UIWebViewDelegate>
+@interface TWTRWebViewController () <WKNavigationDelegate, WKUIDelegate>
 
-@property (nonatomic, strong) UIWebView *webView;
+@property (nonatomic, strong) WKWebView *webView;
 @property (nonatomic, assign) BOOL showCancelButton;
 @property (nonatomic, copy) TWTRWebViewControllerCancelCompletion cancelCompletion;
 
@@ -65,35 +65,66 @@
 
 - (void)loadView
 {
-    [self setWebView:[[UIWebView alloc] init]];
-    [[self webView] setScalesPageToFit:YES];
-    [[self webView] setDelegate:self];
+    [self setWebView:[[WKWebView alloc] init]];
+    //[self webView].scalesPageToFit = YES;
+    //[[self webView] setDelegate:self];
+    [self webView].UIDelegate = self;
+    [self webView].navigationDelegate = self;
     [self setView:[self webView]];
 }
 
-#pragma mark - UIWebview delegate
+#pragma mark - WKWebview delegate
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+/**
+* UIWebView.shouldStartLoadWithRequest
+*/
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
 {
+    NSURLRequest *request = navigationAction.request;
     if (![self whitelistedDomain:request]) {
         // Open in Safari if request is not whitelisted
         NSLog(@"Opening link in Safari browser, as the host is not whitelisted: %@", request.URL);
         [[UIApplication sharedApplication] openURL:request.URL];
-        return NO;
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
+
     if ([self shouldStartLoadWithRequest]) {
-        return [self shouldStartLoadWithRequest](self, request, navigationType);
+        if([self shouldStartLoadWithRequest](self, request, navigationAction)) {
+            decisionHandler(WKNavigationActionPolicyAllow);
+        } else {
+            decisionHandler(WKNavigationActionPolicyCancel);
+        }
+    } else {
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-    return YES;
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+/**
+ * UIWebView.webViewDidStartLoad
+ */
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation
+{
+}
+
+/**
+* UIWebView.webViewDidFinishLoad
+*/
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
+{
+}
+
+/**
+* UIWebView.didFailLoadWithError
+*/
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
     if (self.errorHandler) {
         self.errorHandler(error);
         self.errorHandler = nil;
     }
 }
+
 
 #pragma mark - Internal methods
 

@@ -666,7 +666,7 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
     return [[TWTRMultipartFormDocument alloc] initWithFormElements:@[mediaElement]];
 }
 
-- (nullable NSString *)mediaIDFromResponseData:(NSData *)data error:(NSError **)error
+- (nullable NSString *)mediaIDFromResponseData:(NSData *)data error:(__strong NSError **)error
 {
     NSString *mediaID;
     void (^setError)(NSError *) = ^(NSError *errorToSet) {
@@ -675,7 +675,9 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
         }
     };
 
-    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:error];
+    NSError *return_error = nil;
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&return_error];
+    error = &return_error;
     if (json) {
         if ([json isKindOfClass:[NSDictionary class]]) {
             mediaID = json[TWTRMediaIDStringKey];
@@ -694,7 +696,7 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
 
 #pragma mark - Public Methods
 
-- (NSURLRequest *)URLRequestWithMethod:(NSString *)method URLString:(NSString *)URLString parameters:(NSDictionary *)parameters error:(NSError **)error
+- (NSURLRequest *)URLRequestWithMethod:(NSString *)method URLString:(NSString *)URLString parameters:(NSDictionary *)parameters error:(__strong NSError **)error
 {
     NSURLRequest *request = [self.networkingClient URLRequestWithMethod:method URLString:URLString parameters:parameters];
 
@@ -723,7 +725,7 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
     }
 }
 
-- (NSURLRequest *)URLRequestWithMethod:(NSString *)method withURL:(NSURL *)URL parameters:(NSDictionary *)parameters error:(NSError **)error
+- (NSURLRequest *)URLRequestWithMethod:(NSString *)method withURL:(NSURL *)URL parameters:(NSDictionary *)parameters error:(__strong NSError **)error
 {
     return [self URLRequestWithMethod:method URLString:URL.absoluteString parameters:parameters error:error];
 }

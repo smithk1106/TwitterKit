@@ -151,12 +151,12 @@ extern NSString *const TWTRGenericKeychainItemErrorDomain;
  * The query results will depend on the specificity of the query
  * object as described in its documetation.
  */
-+ (NSArray *)storedItemsMatchingQuery:(TWTRGenericKeychainQuery *)query error:(NSError **)error;
++ (NSArray *)storedItemsMatchingQuery:(TWTRGenericKeychainQuery *)query error:(__strong NSError **)error;
 
 /**
  * Removes all the items matching the given query.
  */
-+ (BOOL)removeAllItemsForQuery:(TWTRGenericKeychainQuery *)query error:(NSError **)error;
++ (BOOL)removeAllItemsForQuery:(TWTRGenericKeychainQuery *)query error:(__strong NSError **)error;
 
 /**
  * Initializes a TWTRGenericKeychainItem object with the given values.
@@ -189,8 +189,8 @@ extern NSString *const TWTRGenericKeychainItemErrorDomain;
  * @param error an optional error that will be set if the operation fails.
  * @return a value representing if the operation was successful
  */
-- (BOOL)storeInKeychain:(NSError **)error;
-- (BOOL)storeInKeychainReplacingExisting:(BOOL)replaceExisting error:(NSError **)error;
+- (BOOL)storeInKeychain:(__strong NSError **)error;
+- (BOOL)storeInKeychainReplacingExisting:(BOOL)replaceExisting error:(__strong NSError **)error;
 
 /**
  * Attempts to remove the wrapper from the keychain.
@@ -201,7 +201,7 @@ extern NSString *const TWTRGenericKeychainItemErrorDomain;
  *
  * @return a value representing if the operation was successful
  */
-- (BOOL)removeFromKeychain:(NSError **)error;
+- (BOOL)removeFromKeychain:(__strong NSError **)error;
 
 @end
 
